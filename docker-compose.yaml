@@ -48,19 +48,49 @@ services:
     expose:
       - 9091
     restart: unless-stopped
-
-  flexget:
-    image: wiserain/flexget:3.5
-    volumes:
-      - ./flexget:/config
-      - ./flexget/custom-cont-init.d:/custom-cont-init.d
-      - ${STORAGE}/torrents:/downloads
-      - ${MEDIA}:/storage
-    ports:
-      - 5050:5050
-    environment:
-      - PUID=1001
-      - PGID=1001
-      - TORRENT_PLUGIN=transmission
-      - FG_WEBUI_PASSWD=p3l4d0_N3RD # la puedes cambiar por la que quieras
+  
+  radarr:
+    image: linuxserver/radarr:4.5.1-nightly
+    container_name: radarr
     restart: unless-stopped
+    ports:
+      - 7878:7878
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Argentina/Buenos_Aires
+    volumes:
+      - ./radarr:/config
+      - ${MEDIA}/movies:/movies
+      - ${STORAGE}/torrents/complete:/downloads
+  
+  sonarr:
+    image: linuxserver/sonarr:4.0.0-develop
+    container_name: sonarr
+    restart: unless-stopped
+    ports:
+      - 8989:8989
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Argentina/Buenos_Aires
+    volumes:
+      - ./sonarr:/config
+      - ${MEDIA}/tv:/tv
+      - ${STORAGE}/torrents/complete:/downloads
+
+  prowlarr:
+    image: linuxserver/prowlarr:1.5.0-nightly
+    container_name: prowlarr
+    restart: unless-stopped
+    ports:
+      - 9696:9696
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Argentina/Buenos_Aires
+    volumes:
+      - ./prowlarr:/config
+      - ${STORAGE}/torrents/to_download:/downloads  # transmission watch directory
